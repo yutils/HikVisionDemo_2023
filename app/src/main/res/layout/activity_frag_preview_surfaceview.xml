@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:id="@+id/ll_bychan_spinner"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/button_get_channel"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:text="通道："
+                    android:textColor="#872BF4"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/bychan_spinner"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:textColor="#872BF4"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+
+            <LinearLayout
+                android:id="@+id/ll_stream_spinner"
+                android:layout_width="0dp"
+                android:layout_height="45dp"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/button_get_stream"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="5dp"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:text="类型："
+                    android:textColor="#278BF4"
+                    android:textSize="15sp" />
+
+                <Spinner
+                    android:id="@+id/stream_spinner_surface"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:background="@null"
+                    android:gravity="center_vertical"
+                    android:textColor="#278BF4"
+                    android:textSize="15sp" />
+            </LinearLayout>
+
+
+            <Button
+                android:id="@+id/button_show_text"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:onClick="onClick"
+                android:text="叠文字"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_clear_text"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:onClick="onClick"
+                android:text="清文字"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:background="#20FF7BF4">
+
+            <!--宽高比：3:2  把宽度设置0，就会自适应比例，主要是适应横屏情况-->
+            <SurfaceView
+                android:id="@+id/Surface_Preview_Play"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="3:2"
+                app:layout_constraintLeft_toLeftOf="parent"
+                app:layout_constraintRight_toRightOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <Button
+                    android:id="@+id/btn_Up"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_toEndOf="@+id/btn_Left"
+                    android:background="@mipmap/camera_move_up" />
+
+                <Button
+                    android:id="@+id/btn_Down"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_below="@+id/btn_Left"
+                    android:layout_toEndOf="@+id/btn_Left"
+                    android:background="@mipmap/camera_move_down" />
+
+                <Button
+                    android:id="@+id/btn_Left"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_below="@id/btn_Up"
+                    android:background="@mipmap/camera_move_left" />
+
+                <Button
+                    android:id="@+id/btn_Right"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_below="@id/btn_Up"
+                    android:layout_toEndOf="@id/btn_Up"
+                    android:background="@mipmap/camera_move_right" />
+
+                <Button
+                    android:id="@+id/btn_ZoomIn"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_below="@+id/btn_Left"
+                    android:layout_alignParentStart="true"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="60dp"
+                    android:background="@mipmap/camera_move_bigger" />
+
+                <Button
+                    android:id="@+id/btn_ZoomOut"
+                    android:layout_width="60dp"
+                    android:layout_height="60dp"
+                    android:layout_below="@+id/btn_Right"
+                    android:layout_alignStart="@+id/btn_Right"
+                    android:layout_marginStart="0dp"
+                    android:layout_marginTop="60dp"
+                    android:background="@mipmap/camera_move_smaller" />
+            </RelativeLayout>
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+
+        <LinearLayout
+            android:id="@+id/preview_play"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_preview_start"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="开始"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_preview_stop"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="停止"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_preview_snap"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="拍照"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_picture"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="拍照内存"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+
+            <Button
+                android:id="@+id/button_preview_record"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="录像"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+            <Button
+                android:id="@+id/button_preview_record_stop"
+                android:layout_width="0dp"
+                android:layout_height="50dp"
+                android:layout_marginStart="0dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="停止"
+                android:textAllCaps="false"
+                android:textSize="15sp" />
+        </LinearLayout>
+
+    </LinearLayout>
+</layout>
