@@ -17,8 +17,6 @@ kotlin语言实现
 ## 开发环境准备
 **推荐使用jetBrains Toolbox 中的android studio，并更新到最新正式版**  
 
-
-### 在releases中有APK可以下载： [点击跳转](https://github.com/yutils/HikVisionDemo_2023/releases)
 # 界面截图
 
 ![PS03](app/doc/screenshot.png)  
