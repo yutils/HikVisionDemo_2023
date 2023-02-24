@@ -1,7 +1,8 @@
 # 海康威视Android studio版 直接代码中改变参数就可以是使用 
 
-根据官方最新SDK写的该demo，封装核心功能
-官方SDK下载地址：https://open.hikvision.com/download/5cda567cf47ae80dd41a54b3?type=10
+根据官方最新SDK写的该demo，封装核心功能  
+kotlin语言实现  
+官方SDK下载地址：https://open.hikvision.com/download/5cda567cf47ae80dd41a54b3?type=10  
 
 1.更新libs到海康威视最新版202212  
 2.更新AndroidStudio到2022.1.1   
