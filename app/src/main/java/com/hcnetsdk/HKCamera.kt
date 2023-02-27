@@ -56,6 +56,7 @@ class HKCamera(var surfaceView: SurfaceView) {
     var m_byStartChan = 0 //start analog channel
     var m_IPChanNum = 0 //digital channel nums
     var m_byStartDChan = 0 //start digital channel
+    var m_iSendDataHandle = -1 //串口数据handle
 
     var isLogin = false
     var devName = "CameraName"
@@ -331,6 +332,84 @@ class HKCamera(var surfaceView: SurfaceView) {
         }
     }
 
+    /**
+     * 打开串口
+     * @param serialPortType 1为232 2为485
+     * @param callBack 回调函数
+     */
+    fun openSerialTrans(serialPortType: Int = 1/*1为232 2为485*/, callBack: SerialDataCallBack): Boolean {
+        return if (m_iSendDataHandle == -1) {
+            //String strHexData = str2HexStr( byteArrayToStr(byRecvBuf));
+            m_iSendDataHandle = SDKGuider.g_sdkGuider.m_comSerialTransGuider.NET_DVR_SerialStart_jni(m_iUserID, serialPortType, callBack)
+            if (m_iSendDataHandle == -1) {
+                Log.e(TAG, "打开串行通道失败" + HCNetSDK.getInstance().NET_DVR_GetLastError())
+                return false
+            }
+            true
+        } else {
+            Log.i(TAG, "您已打开串行通道")
+            true
+        }
+    }
+
+    /**
+     * 关闭串口
+     */
+    fun closeSerialTrans(): Boolean {
+        return if (m_iSendDataHandle != -1) {
+            if (!SDKGuider.g_sdkGuider.m_comSerialTransGuider.NET_DVR_SerialStop_jni(m_iSendDataHandle)) {
+                Log.e(TAG, "关闭串行通道失败" + HCNetSDK.getInstance().NET_DVR_GetLastError())
+                return false
+            }
+            m_iSendDataHandle = -1
+            true
+        } else {
+            Log.i(TAG, "请先打开打开串行通道")
+            false
+        }
+    }
+
+    /**
+     * 向串口发送数据
+     * @param serialChannel 串口通道 获取一共多少个通达 int iChannelNum = (int) m_deviceInfo.m_struDeviceInfoV40_jna.struDeviceV30.byChanNum; 重新1开始数，比如iChannelNum=2，那么就是1,2
+     * @param byteArray 发送的数据
+     */
+    fun sendSerialPort(byteArray: ByteArray, serialChannel: Int = 1): Boolean {
+        if (!SDKGuider.g_sdkGuider.m_comSerialTransGuider.NET_DVR_SerialSend_jni(m_iSendDataHandle, serialChannel, byteArray, byteArray.size)) {
+            Log.e(TAG, "发送数据失败：" + HCNetSDK.getInstance().NET_DVR_GetLastError())
+            return false
+        }
+        Log.d(TAG, "发送数据成功")
+        return true
+    }
+
+    /**
+     * 向串口发送数据
+     * @param serialPortType 串口类型 1为232 2为485
+     * @param serialChannel 串口通道 获取一共多少个通达： var iChannelNum = deviceInfo.m_struDeviceInfoV40_jna.struDeviceV30.byChanNum 重新1开始数，比如iChannelNum=2，那么就是1,2
+     * @param byteArray 发送的数据
+     */
+    fun sendSerialPort(byteArray: ByteArray, serialChannel: Int = 1, serialPortType: Int = 1/*1为232 2为485*/): Boolean {
+        if (!SDKGuider.g_sdkGuider.m_comSerialTransGuider.NET_DVR_SendToSerialPort_jni(m_iUserID, serialPortType, serialChannel, byteArray, byteArray.size)) {
+            Log.e(TAG, "发送数据失败：" + HCNetSDK.getInstance().NET_DVR_GetLastError())
+            return false
+        }
+        Log.d(TAG, "发送数据成功")
+        return true
+    }
+
+    /**
+     * 向串口发送数据
+     * @param byteArray 发送的数据
+     */
+    fun sendSerialPort232(byteArray: ByteArray): Boolean {
+        if (!SDKGuider.g_sdkGuider.m_comSerialTransGuider.NET_DVR_SendTo232Port_jni(m_iUserID, byteArray, byteArray.size)) {
+            Log.e(TAG, "发送数据失败：" + HCNetSDK.getInstance().NET_DVR_GetLastError())
+            return false
+        }
+        Log.d(TAG, "发送数据成功")
+        return true
+    }
     fun destroy() {
         //停止播放
         if (m_iPreviewHandle != -1) {
@@ -343,5 +422,14 @@ class HKCamera(var surfaceView: SurfaceView) {
         } else {
             Log.e(TAG, "退出登录失败：" + SDKGuider.g_sdkGuider.GetLastError_jni())
         }
+        m_iPreviewHandle = -1 // playback
+        m_iSelectChannel = 1 //选择的通道
+        m_iSelectStreamType = 0 //选择的流类型
+        m_iUserID = -1 // return by NET_DVR_Login_v30
+        m_byChanNum = 0 // analog channel nums
+        m_byStartChan = 0 //start analog channel
+        m_IPChanNum = 0 //digital channel nums
+        m_byStartDChan = 0 //start digital channel
+        m_iSendDataHandle = -1 //串口数据handle
     }
 }

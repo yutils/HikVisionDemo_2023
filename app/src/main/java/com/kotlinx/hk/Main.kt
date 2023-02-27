@@ -13,10 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.hcnetsdk.HKCamera
 import com.kotlinx.hk.databinding.ActivityFragPreviewSurfaceviewBinding
-import com.yujing.utils.TTS
-import com.yujing.utils.YImageDialog
-import com.yujing.utils.YPermissions
-import com.yujing.utils.YToast
+import com.yujing.utils.*
 import java.util.regex.Pattern
 
 /**
@@ -44,10 +41,10 @@ class Main : AppCompatActivity() {
 
         hkCamera = HKCamera(binding.SurfacePreviewPlay).apply {
             devName = "余静的摄像头"
-            ip = "192.168.1.70"
+            ip = "192.168.1.31"
             port = "8000"
             username = "admin"
-            password = "pw&123456"
+            password = "pw@123456"
         }
         hkCamera.init()
 
@@ -94,14 +91,6 @@ class Main : AppCompatActivity() {
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
         }
     }
-
-
-    fun getChannel(inPutStr: String?): String {
-        val p = Pattern.compile("[^0-9]")
-        val m = p.matcher(inPutStr)
-        return m.replaceAll("").trim { it <= ' ' }
-    }
-
 
     fun onClick(v: View) {
         when (v.id) {
@@ -165,9 +154,25 @@ class Main : AppCompatActivity() {
             R.id.button_clear_text -> {
                 hkCamera.showString("")
             }
+            R.id.button_open_serialPort -> {
+                val success = hkCamera.openSerialTrans(if (binding.serialPortType.isChecked) 2 else 1) { iSerialHandle, bytes, iBufSize ->
+                    val hex = YConvert.bytesToHexString(bytes)
+                    YToast.show("收到内容：${hex}")
+                }
+                YToast.show("打开串口${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
+            }
+            R.id.button_send_serialPort -> {
+                val success = hkCamera.sendSerialPort("123".toByteArray(), 1, if (binding.serialPortType.isChecked) 2 else 1)
+                YToast.show("发送数据${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
+            }
+            R.id.button_close_serialPort -> {
+                val success = hkCamera.closeSerialTrans()
+                YToast.show("关闭串口${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
+            }
         }
     }
 
+    //按下事件监听
     private val touchListener = View.OnTouchListener { v, event ->
         Log.d("log", "touch:${v.id} ${event!!.action}")
         Thread {
@@ -225,6 +230,12 @@ class Main : AppCompatActivity() {
         }.start()
         v.performClick()
         false
+    }
+
+    fun getChannel(inPutStr: String?): String {
+        val p = Pattern.compile("[^0-9]")
+        val m = p.matcher(inPutStr)
+        return m.replaceAll("").trim { it <= ' ' }
     }
 
     override fun onDestroy() {
