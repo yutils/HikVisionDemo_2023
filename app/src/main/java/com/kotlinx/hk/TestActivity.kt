@@ -17,16 +17,18 @@ import androidx.databinding.DataBindingUtil
 import com.hcnetsdk.control.DevManageGuider.DeviceItem
 import com.hcnetsdk.control.SDKGuider
 import com.hikvision.netsdk.*
-import com.kotlinx.hk.databinding.ActivityFragPreviewSurfaceviewBinding
+import com.kotlinx.hk.databinding.ActivityMainBinding
 import com.yujing.utils.*
 import java.nio.charset.Charset
 import java.util.regex.Pattern
 
 /**
- * 海康威视202212月demo核心播放功能，剥离
+ * 海康威视202212月demo核心播放功能，剥离。
+ * 原始用法，在官方demo中命名：FragPreviewBySurfaceView
  */
-class FragPreviewBySurfaceView : AppCompatActivity() {
-    lateinit var binding: ActivityFragPreviewSurfaceviewBinding
+@kotlin.Deprecated("原始用法，在官方demo中命名：FragPreviewBySurfaceView")
+class TestActivity : AppCompatActivity() {
+    lateinit var binding: ActivityMainBinding
     private var m_osurfaceView: SurfaceView? = null
     private var m_iPreviewHandle = -1 // playback
     private var m_iSelectChannel = -1
@@ -44,7 +46,7 @@ class FragPreviewBySurfaceView : AppCompatActivity() {
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         YPermissions.requestAll(this)//获取权限
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_frag_preview_surfaceview)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         binding.btnUp.setOnTouchListener(touchListener)
         binding.btnDown.setOnTouchListener(touchListener)
@@ -137,20 +139,20 @@ class FragPreviewBySurfaceView : AppCompatActivity() {
             if (-1 == m_iPreviewHandle) return
             val surface = holder.surface
             if (surface.isValid) {
-                if (-1 == SDKGuider.g_sdkGuider.m_comPreviewGuider.RealPlaySurfaceChanged_jni(m_iPreviewHandle, 0, holder)) Toast.makeText(this@FragPreviewBySurfaceView, "NET_DVR_PlayBackSurfaceChanged" + SDKGuider.g_sdkGuider.GetLastError_jni(), Toast.LENGTH_SHORT).show()
+                if (-1 == SDKGuider.g_sdkGuider.m_comPreviewGuider.RealPlaySurfaceChanged_jni(m_iPreviewHandle, 0, holder)) Toast.makeText(this@TestActivity, "NET_DVR_PlayBackSurfaceChanged" + SDKGuider.g_sdkGuider.GetLastError_jni(), Toast.LENGTH_SHORT).show()
             }
         }
 
         override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             //m_osurfaceView!!.setZOrderOnTop(true);//将surfaceView放置在屏幕顶层
-            Toast.makeText(this@FragPreviewBySurfaceView, "surfaceChanged", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this@TestActivity, "surfaceChanged", Toast.LENGTH_SHORT).show();
         }
 
         override fun surfaceDestroyed(holder: SurfaceHolder) {
             if (-1 == m_iPreviewHandle) return
             if (holder.surface.isValid) {
                 if (-1 == SDKGuider.g_sdkGuider.m_comPreviewGuider.RealPlaySurfaceChanged_jni(m_iPreviewHandle, 0, null)) {
-                    Toast.makeText(this@FragPreviewBySurfaceView, "NET_DVR_RealPlaySurfaceChanged" + SDKGuider.g_sdkGuider.GetLastError_jni(), Toast.LENGTH_SHORT).show()
+                    Toast.makeText(this@TestActivity, "NET_DVR_RealPlaySurfaceChanged" + SDKGuider.g_sdkGuider.GetLastError_jni(), Toast.LENGTH_SHORT).show()
                 }
             }
         }

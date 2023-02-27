@@ -12,25 +12,23 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.hcnetsdk.HKCamera
-import com.kotlinx.hk.databinding.ActivityFragPreviewSurfaceviewBinding
-import com.yujing.utils.*
+import com.kotlinx.hk.databinding.ActivityMainBinding
+import com.yujing.utils.YConvert
+import com.yujing.utils.YImageDialog
+import com.yujing.utils.YPermissions
+import com.yujing.utils.YToast
 import java.util.regex.Pattern
 
 /**
  * 海康威视202212月demo核心播放功能，剥离
  */
-class Main : AppCompatActivity() {
-    lateinit var binding: ActivityFragPreviewSurfaceviewBinding
+class MainActivity : AppCompatActivity() {
+    lateinit var binding: ActivityMainBinding
     lateinit var hkCamera: HKCamera
-
-    private var m_data_list_channel: MutableList<String> = ArrayList()
-    private var m_data_list_stream: MutableList<String> = ArrayList()
-    private var m_streamtype_adapter: ArrayAdapter<String>? = null
-    private var m_arrchannel_adapter: ArrayAdapter<String>? = null
     public override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         YPermissions.requestAll(this)//获取权限
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_frag_preview_surfaceview)
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_main)
 
         binding.btnUp.setOnTouchListener(touchListener)
         binding.btnDown.setOnTouchListener(touchListener)
@@ -48,39 +46,21 @@ class Main : AppCompatActivity() {
         }
         hkCamera.init()
 
-
         //配置通道和类型
         var iAnalogStartChan = hkCamera.m_byStartChan
         var iDigitalStartChan = hkCamera.m_byStartDChan
-        m_data_list_channel = ArrayList()
+        val listChannel: MutableList<String> = ArrayList()
         for (indexChanNum in 0 until hkCamera.m_byChanNum) {
-            m_data_list_channel.add("ACamera_$iAnalogStartChan")
+            listChannel.add("ACamera_$iAnalogStartChan")
             iAnalogStartChan++
         }
         for (indexChanNum in 0 until hkCamera.m_IPChanNum) {
-            m_data_list_channel.add("DCamera_$iDigitalStartChan")
+            listChannel.add("DCamera_$iDigitalStartChan")
             iDigitalStartChan++
         }
-        m_arrchannel_adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, m_data_list_channel)
-        m_arrchannel_adapter!!.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.bychanSpinner.adapter = m_arrchannel_adapter
-        //stream spinner
-        //stream Type
-        m_data_list_stream = ArrayList()
-        m_data_list_stream.add("主码流")
-        m_data_list_stream.add("子码流")
-        m_data_list_stream.add("三码流")
-        m_streamtype_adapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, m_data_list_stream)
-        m_streamtype_adapter!!.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.streamSpinnerSurface.adapter = m_streamtype_adapter
-        binding.streamSpinnerSurface.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            //通过此方法为下拉列表设置点击事件
-            override fun onItemSelected(adapterView: AdapterView<*>?, view: View, i: Int, l: Long) {
-                hkCamera.m_iSelectStreamType = i
-            }
-
-            override fun onNothingSelected(adapterView: AdapterView<*>?) {}
-        }
+        val channelAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, listChannel)
+        channelAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.bychanSpinner.adapter = channelAdapter
         binding.bychanSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             //通过此方法为下拉列表设置点击事件
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View, i: Int, l: Long) {
@@ -90,69 +70,66 @@ class Main : AppCompatActivity() {
 
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
         }
+        //stream Type
+        val listStream: MutableList<String> = ArrayList()
+        listStream.add("主码流")
+        listStream.add("子码流")
+        listStream.add("三码流")
+        val streamAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, listStream)
+        streamAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.streamSpinnerSurface.adapter = streamAdapter
+        binding.streamSpinnerSurface.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            //通过此方法为下拉列表设置点击事件
+            override fun onItemSelected(adapterView: AdapterView<*>?, view: View, i: Int, l: Long) {
+                hkCamera.m_iSelectStreamType = i
+            }
+
+            override fun onNothingSelected(adapterView: AdapterView<*>?) {}
+        }
     }
 
     fun onClick(v: View) {
         when (v.id) {
             R.id.button_preview_start -> {
-                if (hkCamera.start()) {
-                    Toast.makeText(this, "开始播放成功 ", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "开始播放失败 ", Toast.LENGTH_SHORT).show()
-                }
+                val success = hkCamera.start()
+                YToast.show("开始播放${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_preview_stop -> {
-                if (hkCamera.stop()) {
-                    Toast.makeText(this, "停止播放成功 ", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "停止播放失败 ", Toast.LENGTH_SHORT).show()
-                }
+                val success = hkCamera.stop()
+                YToast.show("停止播放${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_preview_snap -> {
                 val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).path + "/picture_${System.currentTimeMillis()}.bmp"
-                if (hkCamera.snap(path)) {
-                    Toast.makeText(this, "拍照成功：${path}", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "拍照失败", Toast.LENGTH_SHORT).show()
-                }
+                val success = hkCamera.snap(path)
+                YToast.show("拍照${if (success) "成功：${path}" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_preview_record -> {
                 val path = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DCIM).path + "/video_${System.currentTimeMillis()}.mp4"
-                if (hkCamera.recordStart(path)) {
-                    Toast.makeText(this, "开始录像：${path}", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "录像失败", Toast.LENGTH_SHORT).show()
-                }
+                val success = hkCamera.recordStart(path)
+                YToast.show("开始录像${if (success) "成功：${path}" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_preview_record_stop -> {
-                if (hkCamera.recordStop()) {
-                    Toast.makeText(this, "停止录像录像成功", Toast.LENGTH_SHORT).show()
-                } else {
-                    Toast.makeText(this, "停止录像录像失败", Toast.LENGTH_SHORT).show()
-                }
+                val success = hkCamera.recordStop()
+                YToast.show("停止录像录像${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_picture -> {
-                val time = System.currentTimeMillis()
-                val bitmap: Bitmap? = hkCamera.takePicture()
-                //bitmap = Utils.addTextToBitmap(bitmap, "名称：张三");
-                if (bitmap == null) {
-                    TTS.speak("拍照失败")
-                    YToast.show("拍照失败")
-                    return
-                }
+                val timeStart = System.currentTimeMillis()
+                val bitmap: Bitmap = hkCamera.takePicture() ?: return YToast.showSpeak("拍照失败")
                 YImageDialog.show(bitmap)
                 YToast.show(
                     """
                     分辨率:${bitmap.width}*${bitmap.height}
-                    耗时：${System.currentTimeMillis() - time}
+                    耗时：${System.currentTimeMillis() - timeStart}
                     """.trimIndent()
                 )
             }
             R.id.button_show_text -> {
-                hkCamera.showString("你好，我是余静！")
+                val success = hkCamera.showString("你好，我是余静！")
+                YToast.show("叠加文字${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_clear_text -> {
-                hkCamera.showString("")
+                val success = hkCamera.showString("")
+                YToast.show("叠加文字${if (success) "成功" else "失败"}", Toast.LENGTH_SHORT)
             }
             R.id.button_open_serialPort -> {
                 val success = hkCamera.openSerialTrans(if (binding.serialPortType.isChecked) 2 else 1) { iSerialHandle, bytes, iBufSize ->
