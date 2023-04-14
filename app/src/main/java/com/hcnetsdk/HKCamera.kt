@@ -20,6 +20,20 @@ import java.nio.charset.Charset
  * 基于最新（202212）海康官网SDK编写。
  */
 /*
+准备：
+1.复制libs\hikvision文件夹到新项目
+2.build.gradle中设置
+    2.1 设置so位置
+    sourceSets.main {
+        jniLibs.srcDirs = ['libs/hikvision']
+    }
+    2.2 引入
+    implementation fileTree(dir: 'libs/hikvision', include: ['*.aar','*.jar'])
+3.添加surfaceView
+ <SurfaceView
+        android:id="@+id/surfaceView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
 用法：
 var hkCamera = HKCamera(binding.surfaceView).apply {
     devName = "余静的摄像头"
@@ -49,8 +63,8 @@ hkCamera.showString("你好，我是余静！")
 class HKCamera(var surfaceView: SurfaceView) {
     val TAG = "HKCamera"
     var m_iPreviewHandle = -1 // playback
-    var m_iSelectChannel = 1 //选择的通道
-    var m_iSelectStreamType = 0 //选择的流类型
+    var channel = 1 //选择的通道
+    var streamType = 0 //选择的流类型  0主码流 1子码流 2三码流
     var m_iUserID = -1 // return by NET_DVR_Login_v30
     var m_byChanNum = 0 // analog channel nums
     var m_byStartChan = 0 //start analog channel
@@ -93,6 +107,7 @@ class HKCamera(var surfaceView: SurfaceView) {
             //Surface
             surfaceView.holder.addCallback(callback)
             surfaceView.setZOrderOnTop(true)//将surfaceView放置在屏幕顶层
+            surfaceView.setZOrderMediaOverlay(true)//设置Z顺序覆盖，设置顶层时候，如果需要在视频顶层显示其他view，就必须设置这个
             true
         } else {
             Log.i(TAG, "摄像头登陆失败")
@@ -117,6 +132,7 @@ class HKCamera(var surfaceView: SurfaceView) {
         override fun surfaceChanged(holder: SurfaceHolder, format: Int, width: Int, height: Int) {
             Log.i(TAG, "surfaceChanged")
             //surfaceView.setZOrderOnTop(true);//将surfaceView放置在屏幕顶层
+            //surfaceView.setZOrderMediaOverlay(true)
         }
 
         override fun surfaceDestroyed(holder: SurfaceHolder) {
@@ -136,8 +152,8 @@ class HKCamera(var surfaceView: SurfaceView) {
     fun start(): Boolean {
         if (m_iPreviewHandle != -1) SDKGuider.g_sdkGuider.m_comPreviewGuider.RealPlay_Stop_jni(m_iPreviewHandle)
         val ndp = NET_DVR_PREVIEWINFO()
-        ndp.lChannel = m_iSelectChannel
-        ndp.dwStreamType = m_iSelectStreamType
+        ndp.lChannel = channel
+        ndp.dwStreamType = streamType
         ndp.bBlocked = 1
         ndp.hHwnd = surfaceView.holder
         m_iPreviewHandle = SDKGuider.g_sdkGuider.m_comPreviewGuider.RealPlay_V40_jni(m_iUserID, ndp, null)
@@ -423,8 +439,8 @@ class HKCamera(var surfaceView: SurfaceView) {
             Log.e(TAG, "退出登录失败：" + SDKGuider.g_sdkGuider.GetLastError_jni())
         }
         m_iPreviewHandle = -1 // playback
-        m_iSelectChannel = 1 //选择的通道
-        m_iSelectStreamType = 0 //选择的流类型
+        channel = 1 //选择的通道
+        streamType = 0 //选择的流类型
         m_iUserID = -1 // return by NET_DVR_Login_v30
         m_byChanNum = 0 // analog channel nums
         m_byStartChan = 0 //start analog channel

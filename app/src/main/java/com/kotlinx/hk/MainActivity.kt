@@ -13,10 +13,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.databinding.DataBindingUtil
 import com.hcnetsdk.HKCamera
 import com.kotlinx.hk.databinding.ActivityMainBinding
-import com.yujing.utils.YConvert
-import com.yujing.utils.YImageDialog
-import com.yujing.utils.YPermissions
-import com.yujing.utils.YToast
+import com.yujing.utils.*
 import java.util.regex.Pattern
 
 /**
@@ -39,10 +36,10 @@ class MainActivity : AppCompatActivity() {
 
         hkCamera = HKCamera(binding.SurfacePreviewPlay).apply {
             devName = "余静的摄像头"
-            ip = "192.168.1.31"
+            ip = "192.168.1.68"
             port = "8000"
             username = "admin"
-            password = "pw@123456"
+            password = "pw&123456"
         }
         hkCamera.init()
 
@@ -65,7 +62,7 @@ class MainActivity : AppCompatActivity() {
             //通过此方法为下拉列表设置点击事件
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View, i: Int, l: Long) {
                 val text = binding.bychanSpinner.getItemAtPosition(i).toString()
-                hkCamera.m_iSelectChannel = Integer.valueOf(getChannel(text)).toInt()
+                hkCamera.channel = Integer.valueOf(getChannel(text)).toInt()
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
@@ -81,7 +78,7 @@ class MainActivity : AppCompatActivity() {
         binding.streamSpinnerSurface.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             //通过此方法为下拉列表设置点击事件
             override fun onItemSelected(adapterView: AdapterView<*>?, view: View, i: Int, l: Long) {
-                hkCamera.m_iSelectStreamType = i
+                hkCamera.streamType = i
             }
 
             override fun onNothingSelected(adapterView: AdapterView<*>?) {}
@@ -213,6 +210,17 @@ class MainActivity : AppCompatActivity() {
         val p = Pattern.compile("[^0-9]")
         val m = p.matcher(inPutStr)
         return m.replaceAll("").trim { it <= ' ' }
+    }
+
+    public override fun onResume() {
+        super.onResume()
+        //为什么要延迟，因为如果另外一个页面也在调用hkCamera,关闭另外一个页面回到这个页面的时候，另外一个页面stop还未执行，这个页面的onResume已经执行了，这个时候才执行另外一个页面的stop，导致这个页面视频被关闭。
+        YDelay.run(200) { hkCamera.start() }
+    }
+
+    public override fun onStop() {
+        super.onStop()
+        hkCamera.stop()
     }
 
     override fun onDestroy() {

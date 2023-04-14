@@ -24,7 +24,7 @@ public class DevPreviewGuider {
 
         boolean bRet = HCNetSDKJNAInstance.getInstance().NET_DVR_OpenSound((short) iRet);
         if (bRet) {
-            Log.e("", "NET_DVR_OpenSound Succ!");
+            Log.i("", "NET_DVR_OpenSound Succ!");
         }
         return iRet;
     }
